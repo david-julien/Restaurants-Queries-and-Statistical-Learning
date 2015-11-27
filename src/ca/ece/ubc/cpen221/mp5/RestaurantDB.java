@@ -33,6 +33,7 @@ public class RestaurantDB {
 	 */
 	public RestaurantDB(String restaurantJSONfilename, String reviewsJSONfilename, String usersJSONfilename) {
 		this.restaurants = new ArrayList<Restaurant>();
+		this.reviews = new ArrayList<Review>();
 		
 		parseRestaurants(restaurantJSONfilename);
 		parseReviews(reviewsJSONfilename);
