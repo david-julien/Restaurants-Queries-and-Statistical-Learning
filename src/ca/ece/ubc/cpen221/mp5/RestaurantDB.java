@@ -33,6 +33,7 @@ public class RestaurantDB {
 	 */
 	public RestaurantDB(String restaurantJSONfilename, String reviewsJSONfilename, String usersJSONfilename) {
 		this.restaurants = new ArrayList<Restaurant>();
+		this.users = new ArrayList<User>();
 		this.reviews = new ArrayList<Review>();
 		
 		parseRestaurants(restaurantJSONfilename);
@@ -92,7 +93,20 @@ public class RestaurantDB {
 	 * This method will read the file named in the argument and create a User object based on each JSON object
 	 */
 	private void parseUsers(String filename) {
-		
+		try {
+			File file = new File("data/" + filename);
+			FileReader fileReader = new FileReader(file);
+			BufferedReader bufferedReader = new BufferedReader(fileReader);
+			String line;
+			while ((line = bufferedReader.readLine()) != null) {
+				JSONObject userJSON = (JSONObject)JSONValue.parse(line);
+				this.users.add(new User(userJSON));
+			}
+			fileReader.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
