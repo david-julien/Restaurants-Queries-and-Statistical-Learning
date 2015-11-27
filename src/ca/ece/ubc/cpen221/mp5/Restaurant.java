@@ -36,23 +36,23 @@ public class Restaurant {
 
 	// TODO: Change constructor argument
 	Restaurant(JSONObject restaurantJSON) {
-		this.isOpen = (boolean)restaurantJSON.get("open");
+		this.isOpen = (boolean) restaurantJSON.get("open");
 		this.url = restaurantJSON.get("url").toString();
-		this.longitude = (double)restaurantJSON.get("longitude");
-		this.neighborhoods = (ArrayList<String>)restaurantJSON.get("neighborhoods");
+		this.longitude = (double) restaurantJSON.get("longitude");
+		this.neighborhoods = (ArrayList<String>) restaurantJSON.get("neighborhoods");
 		this.business_id = restaurantJSON.get("business_id").toString();
 		this.name = restaurantJSON.get("name").toString();
-		this.categories = (ArrayList<String>)restaurantJSON.get("categories");
+		this.categories = (ArrayList<String>) restaurantJSON.get("categories");
 		this.state = restaurantJSON.get("state").toString();
 		this.type = restaurantJSON.get("type").toString();
-		this.stars = (double)restaurantJSON.get("stars");
+		this.stars = (double) restaurantJSON.get("stars");
 		this.city = restaurantJSON.get("city").toString();
 		this.fullAddress = restaurantJSON.get("full_address").toString();
-		this.review_count = (long)restaurantJSON.get("review_count");
+		this.review_count = (long) restaurantJSON.get("review_count");
 		this.photo_url = restaurantJSON.get("photo_url").toString();
-		this.schools = (ArrayList<String>)restaurantJSON.get("schools");
-		this.latitude = (double)restaurantJSON.get("latitude");
-		this.price = (long)restaurantJSON.get("price");
+		this.schools = (ArrayList<String>) restaurantJSON.get("schools");
+		this.latitude = (double) restaurantJSON.get("latitude");
+		this.price = (long) restaurantJSON.get("price");
 	}
 	
 
