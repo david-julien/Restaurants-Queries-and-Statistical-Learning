@@ -31,4 +31,36 @@ public class Review {
 		this.user_id = reviewJSON.get("user_id").toString();
 		this.date = reviewJSON.get("date").toString();
 	}
+
+	public String getType() {
+		return type;
+	}
+
+	public String getBusiness_id() {
+		return business_id;
+	}
+
+	public HashMap<String, Long> getVotes() {
+		return votes;
+	}
+
+	public String getReview_id() {
+		return review_id;
+	}
+
+	public String getText() {
+		return text;
+	}
+
+	public long getStars() {
+		return stars;
+	}
+
+	public String getUser_id() {
+		return user_id;
+	}
+
+	public String getDate() {
+		return date;
+	}
 }
