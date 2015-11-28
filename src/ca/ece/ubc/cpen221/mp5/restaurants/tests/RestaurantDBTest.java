@@ -10,7 +10,7 @@ public class RestaurantDBTest {
 
 	@Test
 	public void test() {
-		RestaurantDB retaurantdb = new RestaurantDB("restaurants.json", "reviews.json", "users.json" );
+		RestaurantDB myRestaurantDB = new RestaurantDB("restaurants.json", "reviews.json", "users.json" );
 		assertEquals(true, true);
 	}
 

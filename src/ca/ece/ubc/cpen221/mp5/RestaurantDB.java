@@ -9,7 +9,7 @@ import org.json.simple.*;
 // state the rep invariant and the abstraction function.
 
 public class RestaurantDB {
-	
+
 	private List<Restaurant> restaurants;
 	private List<Review> reviews;
 	private List<User> users;
@@ -35,7 +35,7 @@ public class RestaurantDB {
 		this.restaurants = new ArrayList<Restaurant>();
 		this.users = new ArrayList<User>();
 		this.reviews = new ArrayList<Review>();
-		
+
 		parseRestaurants(restaurantJSONfilename);
 		parseReviews(reviewsJSONfilename);
 		parseUsers(usersJSONfilename);
@@ -48,29 +48,30 @@ public class RestaurantDB {
 	}
 
 	/**
-	 * This method will read the file named in the argument and create a Restaurant object based on each JSON object
+	 * This method will read the file named in the argument and create a
+	 * Restaurant object based on each JSON object
 	 */
 	private void parseRestaurants(String filename) {
-		
+
 		try {
 			File file = new File("data/" + filename);
 			FileReader fileReader = new FileReader(file);
 			BufferedReader bufferedReader = new BufferedReader(fileReader);
 			String line;
 			while ((line = bufferedReader.readLine()) != null) {
-				JSONObject restaurantJSON = (JSONObject)JSONValue.parse(line);
-				this.restaurants.add(new Restaurant(restaurantJSON));
+				addRestaurant(line);
 			}
 			fileReader.close();
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	/**
-	 * This method will read the file named in the argument and create a Review object based on each JSON object
+	 * This method will read the file named in the argument and create a Review
+	 * object based on each JSON object
 	 */
 	private void parseReviews(String filename) {
 		try {
@@ -79,18 +80,18 @@ public class RestaurantDB {
 			BufferedReader bufferedReader = new BufferedReader(fileReader);
 			String line;
 			while ((line = bufferedReader.readLine()) != null) {
-				JSONObject reviewJSON = (JSONObject)JSONValue.parse(line);
-				this.reviews.add(new Review(reviewJSON));
+				addReview(line);
 			}
 			fileReader.close();
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
-	 * This method will read the file named in the argument and create a User object based on each JSON object
+	 * This method will read the file named in the argument and create a User
+	 * object based on each JSON object
 	 */
 	private void parseUsers(String filename) {
 		try {
@@ -99,14 +100,54 @@ public class RestaurantDB {
 			BufferedReader bufferedReader = new BufferedReader(fileReader);
 			String line;
 			while ((line = bufferedReader.readLine()) != null) {
-				JSONObject userJSON = (JSONObject)JSONValue.parse(line);
-				this.users.add(new User(userJSON));
+				addUser(line);
 			}
 			fileReader.close();
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * This method will add a restaurant to the database given the details in
+	 * restaurant
+	 * 
+	 * @param restaurantJSON
+	 *            containing the details about the restaurant to be added
+	 * @return
+	 */
+	private void addRestaurant(String restaurant) {
+		JSONObject restaurantJSON = (JSONObject) JSONValue.parse(restaurant);
+		this.restaurants.add(new Restaurant(restaurantJSON));
+	}
+	
+	/**
+	 * This method will add a review to the database given the details in review
+	 * 
+	 * @param review
+	 *            containing the details about the review to be added
+	 * @return
+	 */
+	private void addReview(String review) {
+		JSONObject reviewJSON = (JSONObject) JSONValue.parse(review);
+		this.reviews.add(new Review(reviewJSON));
+	}
+
+	/**
+	 * This method will add a user to the database given the details in user
+	 * 
+	 * @param user
+	 *            containing the details about the user to be added
+	 * @return
+	 */
+	private void addUser(String user) {
+		JSONObject userJSON = (JSONObject) JSONValue.parse(user);
+		this.users.add(new User(userJSON));
+	}
+	
+	private Restaurant getRestaurant(String business_id) {
+		for ()
 	}
 
 }
