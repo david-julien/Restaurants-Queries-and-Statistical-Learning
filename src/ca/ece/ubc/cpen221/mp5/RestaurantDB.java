@@ -3,16 +3,24 @@ package ca.ece.ubc.cpen221.mp5;
 import java.io.*;
 import java.util.*;
 
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.RuleContext;
 import org.json.simple.*;
+
 // TODO: This class represents the Restaurant Database.
 // Define the internal representation and 
 // state the rep invariant and the abstraction function.
 
 public class RestaurantDB {
 
-	private List<Restaurant> restaurants;
-	private List<Review> reviews;
-	private List<User> users;
+	private final List<Restaurant> restaurants;
+	private final List<Review> reviews;
+	private final List<User> users;
 
 	/**
 	 * Create a database from the Yelp dataset given the names of three files:
@@ -32,9 +40,9 @@ public class RestaurantDB {
 	 *            the filename for the users
 	 */
 	public RestaurantDB(String restaurantJSONfilename, String reviewsJSONfilename, String usersJSONfilename) {
-		this.restaurants = new ArrayList<Restaurant>();
-		this.users = new ArrayList<User>();
-		this.reviews = new ArrayList<Review>();
+		this.restaurants = Collections.synchronizedList(new ArrayList<Restaurant>());
+		this.users = Collections.synchronizedList(new ArrayList<User>());
+		this.reviews = Collections.synchronizedList(new ArrayList<Review>());
 
 		parseRestaurants(restaurantJSONfilename);
 		parseReviews(reviewsJSONfilename);
@@ -42,9 +50,28 @@ public class RestaurantDB {
 	}
 
 	public Set<Restaurant> query(String queryString) {
-		// TODO: Implement this method
-		// Write specs, etc.
-		return null;
+//		System.out.println("Query string is " + queryString);
+		CharStream stream = new ANTLRInputStream(queryString);
+		FormulaLexer lexer = new FormulaLexer(stream);
+		TokenStream tokens = new CommonTokenStream(lexer);
+		FormulaParser parser = new FormulaParser(tokens);
+		
+		ParseTree tree = parser.root();
+		System.out.println(tree.toStringTree(parser));
+		
+		ParseTreeWalker walker = new ParseTreeWalker();
+		FormulaListener_FormulaCreator listener = new FormulaListener_FormulaCreator(this);
+		FormulaPrintEverything printEverything = new FormulaPrintEverything();
+		walker.walk(listener, tree);
+//		walker.walk(printEverything, tree);
+		
+		((RuleContext)tree).inspect(parser);
+		
+		while (true) {
+			
+		}
+		
+//		return listener.getFormula();
 	}
 
 	/**
@@ -113,41 +140,224 @@ public class RestaurantDB {
 	 * This method will add a restaurant to the database given the details in
 	 * restaurant
 	 * 
-	 * @param restaurantJSON
-	 *            containing the details about the restaurant to be added
-	 * @return
+	 * @param restaurant
+	 *            containing the details about the restaurant to be added in
+	 *            JSON format
+	 * @return false if add unsuccessful, true otherwise
 	 */
-	private void addRestaurant(String restaurant) {
-		JSONObject restaurantJSON = (JSONObject) JSONValue.parse(restaurant);
-		this.restaurants.add(new Restaurant(restaurantJSON));
+	public boolean addRestaurant(String restaurantJSONString) {
+		Restaurant addedRestaurant = new Restaurant(restaurantJSONString);
+
+		synchronized (this.restaurants) {
+			for (Restaurant currentRestaurant : this.restaurants) {
+				if (currentRestaurant.equals(addedRestaurant))
+					return false;
+			}
+			this.restaurants.add(addedRestaurant);
+			return true;
+		}
 	}
-	
+
 	/**
 	 * This method will add a review to the database given the details in review
 	 * 
 	 * @param review
-	 *            containing the details about the review to be added
-	 * @return
+	 *            containing the details about the review to be added in JSON
+	 *            format
+	 * @return false if add unsuccessful, true otherwise
 	 */
-	private void addReview(String review) {
+	public boolean addReview(String review) {
 		JSONObject reviewJSON = (JSONObject) JSONValue.parse(review);
-		this.reviews.add(new Review(reviewJSON));
+		Review addedReview = new Review(reviewJSON);
+
+		synchronized (this.reviews) {
+			for (Review currentReview : this.reviews) {
+				if (currentReview.equals(addedReview))
+					return false;
+			}
+			this.reviews.add(addedReview);
+			return true;
+		}
 	}
 
 	/**
 	 * This method will add a user to the database given the details in user
 	 * 
 	 * @param user
-	 *            containing the details about the user to be added
-	 * @return
+	 *            containing the details about the user to be added in JSON
+	 *            format
+	 * @return false if add unsuccessful, true otherwise
 	 */
-	private void addUser(String user) {
+	public boolean addUser(String user) {
 		JSONObject userJSON = (JSONObject) JSONValue.parse(user);
-		this.users.add(new User(userJSON));
+		User addedUser = new User(userJSON);
+
+		synchronized (this.users) {
+			for (User currentUser : this.users) {
+				if (currentUser.equals(addedUser))
+					return false;
+			}
+			this.users.add(addedUser);
+			return true;
+		}
+	}
+
+	/**
+	 * This thread-safe method returns a restaurant's JSON string given a
+	 * business ID. Will return null if restaurant is not found.
+	 * 
+	 * @param business_id
+	 *            that is the business id of the target restaurant
+	 * @return the JSON string of the restaurant if found, null otherwise
+	 */
+	public Restaurant getRestaurant(String business_id) {
+		synchronized (this.restaurants) {
+			for (Restaurant restaurant : restaurants) {
+				if (restaurant.getBusiness_id().equals(business_id)) {
+					return new Restaurant(restaurant.getJSONString());
+				}
+			}
+			return null;
+		}
+	}
+
+	/**
+	 * This thread-safe method returns a review's JSON string given a business
+	 * ID. Will return null if restaurant is not found.
+	 * 
+	 * @param restaurantName
+	 *            that is the restaurant name of the target restaurant
+	 * @return the JSON string of the review if found, null otherwise
+	 */
+	public String getRandomReview(String restaurantName) {
+		List<String> matches = Collections.synchronizedList(new ArrayList<String>());
+
+		synchronized (this.reviews) {
+			for (Review review : reviews) {
+				Restaurant restaurant = this.getRestaurant(review.getBusiness_id());
+				if (restaurant.getName().equals(restaurantName)) {
+					matches.add(review.getJSONString());
+				}
+			}
+		}
+
+		if (!matches.isEmpty()) {
+			Random r = new Random();
+			int low = 0;
+			int high = matches.size();
+			int result = r.nextInt(high - low) + low;
+			String random_review = matches.get(result);
+			return random_review;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * This method returns a list of all the restaurants that have the name
+	 * given by the argument to this method
+	 * 
+	 * @param name
+	 *            of the target restaurants
+	 * @return a list containing all the restaurants with the name of name
+	 */
+	public synchronized List<Restaurant> getRestaurantsByName(String name) {
+		List<Restaurant> matches = new ArrayList<Restaurant>();
+		
+		for (Restaurant restaurant : restaurants) {
+			if (restaurant.getName().equals(name)) {
+				matches.add(new Restaurant(restaurant.getJSONString()));
+			}
+		}
+		return matches;
+	}
+
+	/**
+	 * This method returns a list of all the restaurants that have the category
+	 * given by the argument to this method
+	 * 
+	 * @param category
+	 *            of the target restaurants
+	 * @return a list containing all the restaurants with the category of
+	 *         category
+	 */
+	public synchronized List<Restaurant> getRestaurantsByCategory(String category) {
+		System.out.println(category);
+		List<Restaurant> matches = new ArrayList<Restaurant>();
+		
+		for (Restaurant restaurant : restaurants) {
+			if (restaurant.containsCategory(category)) {
+				matches.add(new Restaurant(restaurant.getJSONString()));
+			}
+		}
+		return matches;
+	}
+
+	/**
+	 * This method returns a list of all the restaurants that are in the neighborhood
+	 * given by the argument to this method
+	 * 
+	 * @param neighbourhood
+	 *            of the target restaurants
+	 * @return a list containing all the restaurants in the neighborhood of
+	 *         neighborhood
+	 */
+	public synchronized List<Restaurant> getRestaurantsByNeighborhood(String neighborhood) {
+		List<Restaurant> matches = new ArrayList<Restaurant>();
+		
+		for (Restaurant restaurant : restaurants) {
+			if (restaurant.containsNeighborhood(neighborhood)) {
+				matches.add(new Restaurant(restaurant.getJSONString()));
+			}
+		}
+		
+		return matches;
 	}
 	
-	private Restaurant getRestaurant(String business_id) {
-		for ()
+	/**
+	 * This method returns a list of all the restaurants that have the price
+	 * given by the arguments to this method
+	 * 
+	 * @param low
+	 *            the starting point of the price range
+	 * @param high
+	 *            the ending point of the price range
+	 * 
+	 * @return a list containing all the restaurants with the price given by the
+	 *         arguments
+	 */
+	public synchronized List<Restaurant> getRestaurantsByPrice(long low, long high) {
+		List<Restaurant> matches = new ArrayList<Restaurant>();
+		
+		for (Restaurant restaurant : restaurants) {
+			if (restaurant.getPrice() >= low && restaurant.getPrice() <= high)
+				matches.add(new Restaurant(restaurant.getJSONString()));
+		}
+		
+		return matches;
+	}
+
+	/**
+	 * This method returns a list of all the restaurants that have the rating
+	 * given by the arguments to this method
+	 * 
+	 * @param low
+	 *            the starting point of the rating range
+	 * @param high
+	 *            the ending point of the rating range
+	 * 
+	 * @return a list containing all the restaurants with the rating given by
+	 *         the arguments
+	 */
+	public synchronized List<Restaurant> getRestaurantsByRating(double low, double high) {
+		List<Restaurant> matches = new ArrayList<Restaurant>();
+		
+		for (Restaurant restaurant : restaurants) {
+			if (restaurant.getStars() >= low && restaurant.getStars() <= high)
+				matches.add(new Restaurant(restaurant.getJSONString()));
+		}
+		
+		return matches;
 	}
 
 }

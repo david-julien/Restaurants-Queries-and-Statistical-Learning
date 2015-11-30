@@ -31,20 +31,37 @@ public class User {
 	public String getUrl() {
 		return url;
 	}
+	
 	public Map<String, Long> getVotes() {
 		return votes;
 	}
+	
 	public String getType() {
 		return type;
 	}
+	
 	public String getUser_id() {
 		return user_id;
 	}
+	
 	public String getName() {
 		return name;
 	}
+	
 	public double getAverage_stars() {
 		return average_stars;
+	}
+	
+	public boolean equals(Object otherObject) {
+		if (!(otherObject instanceof User)) return false;
+		User otherUser = (User) otherObject;
+		if (user_id.equals(otherUser.getUser_id()))
+			return true;
+		return false;
+	}
+	
+	public int hashCode() {
+		return (int)(this.average_stars + this.votes.get("funny") + this.votes.get("useful") + this.votes.get("cool"));
 	}
 	
 }

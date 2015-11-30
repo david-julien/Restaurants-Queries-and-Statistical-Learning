@@ -15,6 +15,8 @@ public class Review {
 	private final String user_id;
 	private final String date;
 	
+	private final String JSONData;
+	
 	public Review(JSONObject reviewJSON) {
 		this.type = reviewJSON.get("type").toString();
 		this.business_id = reviewJSON.get("business_id").toString();
@@ -30,6 +32,11 @@ public class Review {
 		this.stars = (long) reviewJSON.get("stars");
 		this.user_id = reviewJSON.get("user_id").toString();
 		this.date = reviewJSON.get("date").toString();
+		this.JSONData = reviewJSON.toString();
+	}
+	
+	public String getJSONString() {
+		return this.JSONData;
 	}
 
 	public String getType() {
@@ -62,5 +69,19 @@ public class Review {
 
 	public String getDate() {
 		return date;
+	}
+	
+	public boolean equals(Object otherObject) {
+		if (!(otherObject instanceof Review)) return false;
+		Review otherReview = (Review) otherObject;
+		if (this.review_id.equals(otherReview.getReview_id())
+				&& this.business_id.equals(otherReview.getBusiness_id()) 
+				&& this.user_id.equals(otherReview.getUser_id()))
+			return true;
+		return false;
+	}
+	
+	public int hashCode() {
+		return this.text.length();
 	}
 }

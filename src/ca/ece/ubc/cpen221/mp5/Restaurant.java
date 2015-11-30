@@ -33,16 +33,20 @@ public class Restaurant {
 	private final List<String> schools;
 	private final double latitude;
 	private final long price;
+	
+	private final String JSONData;
 
 	// TODO: Change constructor argument
-	Restaurant(JSONObject restaurantJSON) {
+	Restaurant(String restaurantJSONString) {
+		JSONObject restaurantJSON = (JSONObject) JSONValue.parse(restaurantJSONString);
+		
 		this.isOpen = (boolean) restaurantJSON.get("open");
 		this.url = restaurantJSON.get("url").toString();
 		this.longitude = (double) restaurantJSON.get("longitude");
-		this.neighborhoods = (ArrayList<String>) restaurantJSON.get("neighborhoods");
+		this.neighborhoods = Collections.synchronizedList((ArrayList<String>) restaurantJSON.get("neighborhoods"));
 		this.business_id = restaurantJSON.get("business_id").toString();
 		this.name = restaurantJSON.get("name").toString();
-		this.categories = (ArrayList<String>) restaurantJSON.get("categories");
+		this.categories = Collections.synchronizedList((ArrayList<String>) restaurantJSON.get("categories"));
 		this.state = restaurantJSON.get("state").toString();
 		this.type = restaurantJSON.get("type").toString();
 		this.stars = (double) restaurantJSON.get("stars");
@@ -53,8 +57,12 @@ public class Restaurant {
 		this.schools = (ArrayList<String>) restaurantJSON.get("schools");
 		this.latitude = (double) restaurantJSON.get("latitude");
 		this.price = (long) restaurantJSON.get("price");
+		this.JSONData = restaurantJSONString;
 	}
 	
+	public String getJSONString() {
+		return this.JSONData;
+	}
 
 	public boolean isOpen() {
 		return isOpen;
@@ -68,7 +76,7 @@ public class Restaurant {
 		return longitude;
 	}
 
-	public List<String> getNeighborhoods() {
+	private List<String> getNeighborhoods() {
 		return neighborhoods;
 	}
 
@@ -80,7 +88,7 @@ public class Restaurant {
 		return name;
 	}
 
-	public List<String> getCatagories() {
+	private List<String> getCategories() {
 		return categories;
 	}
 
@@ -122,5 +130,28 @@ public class Restaurant {
 
 	public long getPrice() {
 		return price;
+	}
+	
+	public boolean equals(Object otherObject) {
+		if (!(otherObject instanceof Restaurant)) return false;
+		Restaurant otherRestaurant = (Restaurant) otherObject;
+		if (this.name.equals(otherRestaurant.getName()) 
+				&& this.business_id.equals(otherRestaurant.getBusiness_id()) 
+				&& this.latitude == otherRestaurant.getLatitude()
+				&& this.longitude == otherRestaurant.getLongitude())
+			return true;
+		return false;
+	}
+	
+	public int hashCode() {
+		return (int) (this.longitude + this.latitude + this.stars + this.review_count + this.price);
+	}
+	
+	public boolean containsCategory(String category) {
+		return (this.getCategories().contains(category));
+	}
+	
+	public boolean containsNeighborhood(String neighborhood) {
+		return (this.getNeighborhoods().contains(neighborhood));
 	}
 }
