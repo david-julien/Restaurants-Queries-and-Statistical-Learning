@@ -35,7 +35,8 @@ public class FormulaListener_FormulaCreator extends FormulaBaseListener {
 	}
 	
 	public void exitAndexpr(FormulaParser.AndexprContext ctx) {
-		System.out.println(ctx.children);
+		//System.out.println(ctx.start.getType());
+		System.out.println(ctx.AND());
 	}
 	
 	public void exitIn(FormulaParser.InContext ctx) {
