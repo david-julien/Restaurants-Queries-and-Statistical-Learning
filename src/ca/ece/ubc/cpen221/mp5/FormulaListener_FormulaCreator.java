@@ -61,7 +61,6 @@ public class FormulaListener_FormulaCreator extends FormulaBaseListener {
         String query = token.getText();
         query = query.replaceAll("^\"|\"$", "");
         List<Restaurant> restaurants = restaurantDB.getRestaurantsByName(query);
-//        System.out.println(restaurants);
         stack.push(restaurants);
 	}
 	
